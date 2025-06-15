@@ -2,7 +2,6 @@ package com.example.a2048test3;
 
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +9,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
+import com.example.a2048test3.database.GameApi;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -25,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView[][] tiles = new TextView[4][4];  // Tablica do przechowywania referencji do pól
 
     private GameLogic gameLogic;  // Obiekt klasy GameLogic
+    private GameApi gameApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +41,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         moveCountText = findViewById(R.id.moveCountText);  // Znajdź TextView dla liczby ruchów
         gameBoard = findViewById(R.id.gameBoard);
 
+        // Inicjalizacja Retrofit
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:5000/")  // Zmieniony adres dla emulatora.addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        gameApi = retrofit.create(GameApi.class);
+
         // Inicjalizacja planszy 4x4
         initBoard();
 
         // Inicjalizacja bazy danych
-        GameScoreDatabase gameScoreDatabase = new GameScoreDatabase(this);
+        //GameScoreDatabase gameScoreDatabase = new GameScoreDatabase(this);
 
         // Inicjalizacja GameLogic
-        gameLogic = new GameLogic(tiles, gameScoreDatabase);  // Przekazujemy referencje do pól
+        gameLogic = new GameLogic(tiles, gameApi, this);  // Przekazujemy referencje do pól
 
         // Inicjalizacja SensorManager i czujników
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -54,12 +67,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
 
         // Pobranie początkowej liczby ruchów z bazy danych i wyświetlenie
-        int initialMoveCount = gameScoreDatabase.getMoveCount("Player1");  // Pobranie liczby ruchów z bazy
-        moveCountText.setText("Liczba ruchów: " + initialMoveCount);
+        //int initialMoveCount = gameScoreDatabase.getMoveCount("Player1");  // Pobranie liczby ruchów z bazy
+        //moveCountText.setText("Liczba ruchów: " + initialMoveCount);
 
         // Dodanie początkowych bloczków
         gameLogic.addNewTile();
         gameLogic.addNewTile();
+
+        gameLogic.getMoveCount();
     }
 
     private void initBoard() {
@@ -125,11 +140,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    // Funkcja aktualizująca licznik ruchów na UI
-    private void updateMoveCount() {
-        int moveCount = gameLogic.getMoveCount();  // Pobieramy liczbę ruchów z GameLogic
-        moveCountText.setText("Liczba ruchów: " + moveCount);
-    }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -147,5 +158,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
+    }
+
+    // Funkcja aktualizująca licznik ruchów na UI
+    private void updateMoveCount() {
+        //int moveCount = gameLogic.getMoveCount();  // Pobieramy liczbę ruchów z GameLogic
+        //moveCountText.setText("Liczba ruchów: " + moveCount);
+    }
+
+    // Funkcja aktualizująca licznik ruchów na UI
+    public void updateMoveCountText(int moveCount) {
+        moveCountText.setText("Liczba ruchów: " + moveCount);
     }
 }

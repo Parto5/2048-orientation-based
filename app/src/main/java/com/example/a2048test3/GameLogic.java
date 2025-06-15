@@ -1,21 +1,31 @@
 package com.example.a2048test3;
 
+import android.util.Log;
 import android.widget.TextView;
+
+import com.example.a2048test3.database.*;
+
 import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GameLogic {
 
+    private MainActivity mainActivity;
+    private GameApi gameApi;
     private TextView[][] tiles;  // Tablica przechowująca referencje do pól
     private int[][] board;       // Plansza do przechowywania wartości
     private boolean isMoving = false;  // Flaga kontrolująca, czy ruch jest w trakcie
     private boolean canMove = true; // Flaga sprawdzająca, czy ruchy są dozwolone
-    //private int moveCount = 0; // Liczba ruchów
+
     private String username = "Player1";
-    private GameScoreDatabase gameScoreDatabase;
-    public GameLogic(TextView[][] tiles, GameScoreDatabase gameScoreDatabase) {
+    public GameLogic(TextView[][] tiles, GameApi gameApi, MainActivity mainActivity) {
         this.tiles = tiles;
         this.board = new int[4][4];  // Plansza 4x4
-        this.gameScoreDatabase = gameScoreDatabase;
+        this.gameApi = gameApi;
+        this.mainActivity = mainActivity; // Przechowujemy referencję do MainActivity
     }
 
     // Inicjalizacja planszy
@@ -42,17 +52,48 @@ public class GameLogic {
         tiles[row][col].setText(String.valueOf(value));
     }
 
-    // Zwiększenie liczby ruchów
     public void incrementMoveCount() {
-        int moveCount = gameScoreDatabase.getMoveCount(username);
-        moveCount++;
-        gameScoreDatabase.updateMoveCount(username, moveCount);
+        // Pobranie aktualnej liczby ruchów z serwera
+        gameApi.getMoveCount(username).enqueue(new Callback<MoveCountResponse>() {
+            @Override
+            public void onResponse(Call<MoveCountResponse> call, Response<MoveCountResponse> response) {
+                if (response.isSuccessful()) {
+                    int currentMoveCount = response.body().getMove_count();
+                    currentMoveCount++;
+                    Log.d("GameLogic", "Received move count: " + currentMoveCount);
+
+                    // Zaktualizowanie liczby ruchów na serwerze
+                    int finalCurrentMoveCount = currentMoveCount;
+                    gameApi.updateMoveCount(new MoveCountRequest(username, currentMoveCount)).enqueue(new Callback<MoveCountResponse>() {
+                        @Override
+                        public void onResponse(Call<MoveCountResponse> call, Response<MoveCountResponse> response) {
+                            if (response.isSuccessful()) {
+                                Log.d("GameLogic", "Move count updated successfully.");
+                                // Po udanej aktualizacji liczby ruchów, wywołujemy metodę z MainActivity
+                                mainActivity.updateMoveCountText(finalCurrentMoveCount);
+                            } else {
+                                Log.e("GameLogic", "Failed to update move count on server.");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<MoveCountResponse> call, Throwable t) {
+                            Log.e("GameLogic", "Failed to update move count on server: " + t.getMessage());
+                        }
+                    });
+                } else {
+                    Log.e("GameLogic", "Failed to fetch move count from server.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoveCountResponse> call, Throwable t) {
+                Log.e("GameLogic", "Failed to fetch move count from server: " + t.getMessage());
+            }
+        });
     }
 
-    // Pobranie liczby ruchów
-    public int getMoveCount() {
-        return gameScoreDatabase.getMoveCount(username);
-    }
+
 
     // Metoda wykonująca ruch w odpowiednim kierunku
     public void moveBlocks(String direction) {
@@ -116,9 +157,6 @@ public class GameLogic {
         // Dodanie nowego bloczka po każdym ruchu
         addNewTile();
         incrementMoveCount(); //Zwiększenie liczby ruchów
-
-        // Zresetowanie flagi, aby umożliwić kolejny ruch
-        //isMoving = false;
     }
 
     // Ustawienie flagi 'canMove' na true, gdy brak pochyłu
@@ -178,4 +216,28 @@ public class GameLogic {
         }
         return newCol;
     }
+
+    // Pobranie liczby ruchów z serwera
+    public void getMoveCount() {
+        // Zmieniamy sposób pobierania liczby ruchów, teraz korzystamy z serwera
+        gameApi.getMoveCount(username).enqueue(new Callback<MoveCountResponse>() {
+            @Override
+            public void onResponse(Call<MoveCountResponse> call, Response<MoveCountResponse> response) {
+                if (response.isSuccessful()) {
+                    int moveCount = response.body().getMove_count();
+                    // Po pobraniu liczby ruchów, wywołujemy metodę z MainActivity
+                    mainActivity.updateMoveCountText(moveCount);
+                } else {
+                    Log.e("GameLogic", "Failed to fetch move count from server.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoveCountResponse> call, Throwable t) {
+                // Obsługujemy błąd
+                Log.e("GameLogic", "Failed to fetch move count from server: " + t.getMessage());
+            }
+        });
+    }
+
 }
