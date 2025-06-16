@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Tło planszy: Jasnoszary kolor -->
-    <solid android:color="#f0f0f0"/>
+    <solid android:color="#CFC5B0"/>
 
     <!-- Zaokrąglone rogi dla planszy -->
     <corners android:radius="10dp"/>

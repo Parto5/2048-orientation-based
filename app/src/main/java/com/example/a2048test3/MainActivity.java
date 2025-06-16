@@ -1,7 +1,10 @@
 package com.example.a2048test3;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // Inicjalizacja planszy 4x4
         initBoard();
+        initButtonGoToLogin();
 
         // Inicjalizacja bazy danych
         //GameScoreDatabase gameScoreDatabase = new GameScoreDatabase(this);
@@ -75,6 +79,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         gameLogic.addNewTile();
 
         gameLogic.getMoveCount();
+    }
+
+    private void initButtonGoToLogin() {
+        Button button = findViewById(R.id.goToLoginButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Przechodzimy do ekranu logowania
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void initBoard() {

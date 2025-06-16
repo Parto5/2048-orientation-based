@@ -13,9 +13,9 @@ import retrofit2.Response;
 
 public class GameLogic {
 
-    private MainActivity mainActivity;
-    private GameApi gameApi;
-    private TextView[][] tiles;  // Tablica przechowująca referencje do pól
+    private final MainActivity mainActivity;
+    private final GameApi gameApi;
+    private final TextView[][] tiles;  // Tablica przechowująca referencje do pól
     private int[][] board;       // Plansza do przechowywania wartości
     private boolean isMoving = false;  // Flaga kontrolująca, czy ruch jest w trakcie
     private boolean canMove = true; // Flaga sprawdzająca, czy ruchy są dozwolone
