@@ -1,16 +1,24 @@
 package com.example.a2048test3.database;
 
-
-public class MoveCountRequest {
+public class LoginResponse {
+    private String message;
     private String username;
-    private String password;
     private int move_count;
 
-    // Konstruktor, gettery, settery
-    public MoveCountRequest(String username, String password, int move_count) {
+    // Konstruktor, gettery i settery
+
+    public LoginResponse(String message, String username, int move_count) {
+        this.message = message;
         this.username = username;
         this.move_count = move_count;
-        this.password = password;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getUsername() {
@@ -28,13 +36,4 @@ public class MoveCountRequest {
     public void setMove_count(int move_count) {
         this.move_count = move_count;
     }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
-

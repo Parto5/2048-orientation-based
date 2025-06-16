@@ -13,4 +13,9 @@ public interface GameApi {
 
     @POST("/update_move_count")
     Call<MoveCountResponse> updateMoveCount(@Body MoveCountRequest request);
+
+    @POST("/login")
+    Call<LoginResponse> login(@Body LoginRequest request);  // Dodanie metody logowania
+    @POST("/register")
+    Call<RegisterResponse> register(@Body RegisterRequest request);  // Dodanie metody rejestracji
 }

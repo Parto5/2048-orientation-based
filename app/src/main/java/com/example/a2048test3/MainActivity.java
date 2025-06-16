@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private GameLogic gameLogic;  // Obiekt klasy GameLogic
     private GameApi gameApi;
+    private String username = "Player1";
+    private String password = "123";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         statusText = findViewById(R.id.statusText);
         moveCountText = findViewById(R.id.moveCountText);  // Znajdź TextView dla liczby ruchów
         gameBoard = findViewById(R.id.gameBoard);
+
+        // Retrieve username and password passed from LoginActivity
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
+        String password = intent.getStringExtra("password");
+
+        if (username != null && password != null) {
+            // Initialize GameLogic with username and password
+            gameLogic = new GameLogic(tiles, gameApi, this, username, password);
+        } else {
+            // Default username if no data passed
+            gameLogic = new GameLogic(tiles, gameApi, this, "Player1", "123");
+        }
+
 
         // Inicjalizacja Retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -55,11 +71,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         initBoard();
         initButtonGoToLogin();
 
-        // Inicjalizacja bazy danych
-        //GameScoreDatabase gameScoreDatabase = new GameScoreDatabase(this);
-
         // Inicjalizacja GameLogic
-        gameLogic = new GameLogic(tiles, gameApi, this);  // Przekazujemy referencje do pól
+        gameLogic = new GameLogic(tiles, gameApi, this, username, password
+        );  // Przekazujemy referencje do pól
 
         // Inicjalizacja SensorManager i czujników
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -69,10 +83,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Rejestracja nasłuchiwaczy dla czujników
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-
-        // Pobranie początkowej liczby ruchów z bazy danych i wyświetlenie
-        //int initialMoveCount = gameScoreDatabase.getMoveCount("Player1");  // Pobranie liczby ruchów z bazy
-        //moveCountText.setText("Liczba ruchów: " + initialMoveCount);
 
         // Dodanie początkowych bloczków
         gameLogic.addNewTile();

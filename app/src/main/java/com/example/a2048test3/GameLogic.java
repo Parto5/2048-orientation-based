@@ -21,11 +21,14 @@ public class GameLogic {
     private boolean canMove = true; // Flaga sprawdzająca, czy ruchy są dozwolone
 
     private String username = "Player1";
-    public GameLogic(TextView[][] tiles, GameApi gameApi, MainActivity mainActivity) {
+    private String password = "123";
+    public GameLogic(TextView[][] tiles, GameApi gameApi, MainActivity mainActivity, String username, String password) {
         this.tiles = tiles;
         this.board = new int[4][4];  // Plansza 4x4
         this.gameApi = gameApi;
         this.mainActivity = mainActivity; // Przechowujemy referencję do MainActivity
+        this.username = username;
+        this.password = username;
     }
 
     // Inicjalizacja planszy
@@ -64,7 +67,7 @@ public class GameLogic {
 
                     // Zaktualizowanie liczby ruchów na serwerze
                     int finalCurrentMoveCount = currentMoveCount;
-                    gameApi.updateMoveCount(new MoveCountRequest(username, currentMoveCount)).enqueue(new Callback<MoveCountResponse>() {
+                    gameApi.updateMoveCount(new MoveCountRequest(username, password, currentMoveCount)).enqueue(new Callback<MoveCountResponse>() {
                         @Override
                         public void onResponse(Call<MoveCountResponse> call, Response<MoveCountResponse> response) {
                             if (response.isSuccessful()) {

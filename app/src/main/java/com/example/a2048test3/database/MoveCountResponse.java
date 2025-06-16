@@ -2,6 +2,8 @@ package com.example.a2048test3.database;
 
 public class MoveCountResponse {
     private String username;
+
+    private String password;
     private int move_count;
     private String message;
 
@@ -29,4 +31,13 @@ public class MoveCountResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }
